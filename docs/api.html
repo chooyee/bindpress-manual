@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API · @bindpress/manual</title>
+<meta name="description" content="API reference for @bindpress/manual: renderManual, validateManual, the reader, CSS custom properties and security.">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<header class="site-head"><div class="site-head-inner">
+  <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6M9 12h6"/></svg>@bindpress/manual</a>
+  <nav class="site-nav" aria-label="Documentation"><a href="index.html">Overview</a><a href="format.html">JSON format</a><a href="api.html" aria-current="page">API</a><a href="demo.html">Demo</a></nav>
+  <span class="spacer"></span><a class="gh" href="https://github.com/chooyee/bindpress-manual">GitHub</a>
+</div></header>
+
+<div class="page">
+<nav class="toc" aria-label="On this page"><strong>On this page</strong><ol>
+  <li><a href="#render">renderManual</a></li>
+  <li><a href="#validate">validateManual</a></li>
+  <li><a href="#jsonld">faqJsonLd</a></li>
+  <li><a href="#model">Data model</a></li>
+  <li><a href="#escape">esc and safeUrl</a></li>
+  <li><a href="#reader">The reader</a></li>
+  <li><a href="#styling">Styling</a></li>
+  <li><a href="#security">Security</a></li>
+  <li><a href="#types">TypeScript</a></li>
+  <li><a href="#support">Browser support</a></li>
+</ol></nav>
+
+<article>
+<h1>API reference</h1>
+<p class="lead">Everything the package exports, the reader, and how to style and secure it.</p>
+
+<h2 id="render"><code>renderManual(manual, options?)</code></h2>
+<p>Renders a manual or FAQ to an HTML string. The data doesn't have to be clean: it goes through <a href="#model"><code>normalizeManual()</code></a> first, and every value is escaped.</p>
+<pre><code>import { renderManual } from '@bindpress/manual';
+
+const html = renderManual(json, { id: 'guide' });</code></pre>
+<div class="table-wrap"><table>
+  <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>string</td><td><code>"manual"</code></td><td>The prefix for every id in the HTML (see <a href="format.html#addresses">Addresses</a>). Use a different one for each manual on a page. Letters, digits, <code>-</code> and <code>_</code> only; anything else falls back to the default.</td></tr>
+    <tr><td><code>view</code></td><td><code>"auto"</code> | <code>"paged"</code> | <code>"faq"</code></td><td><code>"auto"</code></td><td>With auto, an FAQ gets the FAQ view and a manual the paged view. Set it to pick a view yourself, for example to keep an FAQ in the paged view.</td></tr>
+    <tr><td><code>edit</code></td><td>boolean</td><td><code>false</code></td><td>When true, renders a short summary card (title and first levels) instead, for an editor's canvas.</td></tr>
+  </tbody>
+</table></div>
+<p>Returns a string of HTML with one outer element, <code>&lt;div class="x-man …"&gt;</code>. It has <code>data-manual</code> in the paged view and <code>data-faq</code> in the FAQ view.</p>
+
+<h3><code>renderBlock(block, options?)</code></h3>
+<p>Renders one <a href="format.html#blocks">content block</a> on its own. Pass it a normalized block (see <code>normalizeBlock</code>). The options are <code>headingLevel</code> (the <code>&lt;h…&gt;</code> of a heading block, 3 by default), <code>questionId</code> (gives a question an id and a "Link to this answer" link), and <code>nextFigureLabel</code> (a function returning "Figure 1.2" and so on).</p>
+
+<h2 id="validate"><code>validateManual(manual)</code></h2>
+<p>Checks data against the <a href="format.html">format</a> and reports every mistake, in words an author can act on. Use it where JSON comes in: an import, an API or a build step.</p>
+<pre><code>const { valid, errors } = validateManual(json);
+// errors: [{ path: 'pages[2].blocks[0].tone', message: 'must be one of "info", "warning"' }, …]</code></pre>
+<p>It follows the JSON Schema, and also checks what a schema can't: the first page is level 0, levels go down one step at a time, page ids are unique, and question ids are unique within a page. Unknown fields are allowed.</p>
+
+<h2 id="jsonld"><code>faqJsonLd(manual)</code></h2>
+<p>Returns schema.org <code>FAQPage</code> data for the manual's questions, as JSON text ready for a script element. It returns <code>""</code> when there are no answered questions. <code>&lt;</code>, <code>&gt;</code> and <code>&amp;</code> are escaped, so no answer can close the element.</p>
+<pre><code>const jsonLd = faqJsonLd(faq);
+const head = jsonLd ? `&lt;script type="application/ld+json"&gt;${jsonLd}&lt;/script&gt;` : '';</code></pre>
+<p>It is opt-in because search engines expect one FAQPage per page, and only you know whether the FAQ is the page's main content. JSON-LD is data, not script, so a Content Security Policy doesn't need to allow it.</p>
+
+<h2 id="model">Data model</h2>
+<p>Pure functions with no DOM. Use them to build an editor or a migration, or to read a manual's structure.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Export</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>normalizeManual(raw)</code></td><td>Returns a manual with every field present and valid. It never throws (see <a href="format.html#rules">Checking and cleaning</a>).</td></tr>
+    <tr><td><code>normalizeBlock(raw)</code></td><td>The same for one block.</td></tr>
+    <tr><td><code>outline(manual)</code></td><td>Takes a normalized manual and returns, per page: <code>{ page, index, pageNumber, number, chapter, figureStart }</code>. <code>number</code> is "2.1.3", and <code>pageNumber</code> counts the cover as 1.</td></tr>
+    <tr><td><code>buildTree(entries)</code></td><td>Nests a flat list (pages or outline entries) as <code>[{ entry, children }]</code>.</td></tr>
+    <tr><td><code>groupEnd(pages, index)</code></td><td>Returns the index just after a page's last sub-page.</td></tr>
+    <tr><td><code>allowedMoves(pages, index)</code></td><td>Returns <code>{ up, down, in, out }</code>: which moves make sense, for enabling an editor's buttons.</td></tr>
+    <tr><td><code>movePage(pages, index, direction)</code></td><td>Moves a page with its sub-pages: <code>"up"</code>, <code>"down"</code>, <code>"in"</code> (under the page above) or <code>"out"</code> (up a level). Returns a new list.</td></tr>
+    <tr><td><code>addPage(pages, index, isChild?)</code></td><td>Adds a page after another page's group, or as its last sub-page. With <code>index</code> <code>null</code>, adds a chapter at the end. Returns <code>{ pages, index }</code>.</td></tr>
+    <tr><td><code>removePage(pages, index)</code></td><td>Removes a page with its sub-pages.</td></tr>
+    <tr><td><code>parseListItems(text)</code>, <code>parseTableRows(text)</code></td><td>Split list and table text the way the renderer does.</td></tr>
+    <tr><td><code>formatDate(isoDate)</code></td><td>Turns <code>"2026-11-05"</code> into "5 November 2026".</td></tr>
+    <tr><td><code>sampleManual()</code>, <code>sampleFaq()</code></td><td>Small, valid documents to start from.</td></tr>
+    <tr><td><code>newPageId()</code></td><td>Returns a random id for a new page.</td></tr>
+    <tr><td><code>KINDS</code>, <code>THEMES</code>, <code>BLOCK_TYPES</code>, <code>LIST_STYLES</code>, <code>NOTE_TONES</code>, <code>PICTURE_SIZES</code>, <code>PICTURE_ALIGNS</code>, <code>MAX_LEVEL</code>, <code>ID_PATTERN</code>, <code>DATE_PATTERN</code></td><td>The allowed values, for building forms. The first value in each list is the default.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="escape"><code>esc(value)</code> and <code>safeUrl(url, isImage?)</code></h2>
+<p>These are the two helpers the renderer uses. <code>esc</code> escapes <code>&amp; &lt; &gt; " '</code> for HTML text and quoted attributes. <code>safeUrl</code> lets relative and <code>http(s)</code> addresses through. For links it also allows <code>mailto:</code>, and for pictures <code>data:image/…</code>. Anything else is refused: a link gets <code>#</code> and a picture <code>""</code>. It removes spaces and control characters first, so <code>java&#9;script:</code> is caught. The result still needs <code>esc()</code> before it goes in an attribute.</p>
+
+<h2 id="reader">The reader</h2>
+<pre><code>import { startManualReaders } from '@bindpress/manual/reader';
+
+startManualReaders();            // every manual and FAQ in the document
+startManualReaders(container);   // only those inside an element, such as after inserting HTML</code></pre>
+<p>It starts each manual and FAQ that isn't running yet, and returns how many it started, so it is safe to call again.</p>
+<p>Before you remove or replace a manual's HTML (as a single-page app does on leaving a page), call <code>stopManualReaders(container)</code>. It removes the readers' listeners on <code>window</code> and <code>document</code>. To run one element yourself, use <code>startPagedReader(element)</code> or <code>startFaqReader(element)</code>, which return a function that stops it.</p>
+
+<h3>Paged view</h3>
+<ul>
+  <li>One sheet at a time, with a folding contents tree. On narrow screens the tree slides over the sheet.</li>
+  <li>Search highlights every match and lists the pages that have matches. <kbd>Enter</kbd> goes to the next match and <kbd>Shift</kbd>+<kbd>Enter</kbd> to the previous one.</li>
+  <li>Page number box, previous and next, zoom from 60% to 160%, full screen, and print or save as PDF.</li>
+  <li>Keys: <kbd>←</kbd> <kbd>→</kbd> or <kbd>Page Up</kbd> <kbd>Page Down</kbd> turn pages, <kbd>/</kbd> searches, and <kbd>Esc</kbd> leaves full screen. On touch screens a sideways swipe turns the page.</li>
+  <li>A click on a picture opens it full size.</li>
+  <li>The address follows the current sheet, so it can be shared.</li>
+</ul>
+<h3>FAQ view</h3>
+<ul>
+  <li>Search filters as you type. Matching questions open with the match highlighted, and the rest are hidden. A topic whose title matches keeps all its questions. <kbd>Esc</kbd> clears the search.</li>
+  <li>Expand all and Collapse all buttons.</li>
+  <li>The topic in view is marked in the topic list.</li>
+  <li>An address that points to an answer opens it. Opening a question by hand puts its address in the address bar, ready to copy.</li>
+  <li>Printing opens every answer. <kbd>/</kbd> focuses the search.</li>
+</ul>
+
+<h2 id="styling">Styling</h2>
+<p>Load <code>@bindpress/manual/manual.css</code>. Everything sits under <code>.x-man</code>, and colours and fonts are CSS custom properties. To restyle, set them on a selector more specific than the theme's:</p>
+<pre><code>.my-site .x-man {
+  --man-accent: #8a1538;
+  --man-body: "Source Serif 4", Georgia, serif;
+}</code></pre>
+<div class="table-wrap"><table>
+  <thead><tr><th>Property</th><th>Used for</th></tr></thead>
+  <tbody>
+    <tr><td><code>--man-paper</code>, <code>--man-ink</code>, <code>--man-soft</code></td><td>Background, text and quieter text</td></tr>
+    <tr><td><code>--man-accent</code></td><td>Headings, numbers, links and the cover band</td></tr>
+    <tr><td><code>--man-rule</code>, <code>--man-tint</code></td><td>Lines and borders, and soft backgrounds such as notes, table headers and open answers</td></tr>
+    <tr><td><code>--man-body</code>, <code>--man-head</code></td><td>Text and heading fonts</td></tr>
+    <tr><td><code>--man-viewer</code></td><td>The grey "desk" the sheets lie on (paged view)</td></tr>
+    <tr><td><code>--man-bar</code>, <code>--man-bar-2</code>, <code>--man-bar-fg</code>, <code>--man-bar-muted</code></td><td>The reader's toolbar (paged view)</td></tr>
+    <tr><td><code>--man-nav-bg</code>, <code>--man-nav-fg</code>, <code>--man-nav-line</code>, <code>--man-nav-accent</code></td><td>The contents tree (paged view)</td></tr>
+  </tbody>
+</table></div>
+<p>The outer element also has <code>x-man-theme-&lt;theme&gt;</code> and <code>x-man-kind-&lt;kind&gt;</code> classes, plus <code>x-man-faq</code> in the FAQ view and <code>is-reader</code> once the reader runs. The layout switches to its narrow form when the manual itself is narrower than 760px. That is a container query, so a manual in a sidebar gets it too.</p>
+<p>The stylesheet sets no margin around the manual. That is your page's job.</p>
+
+<h2 id="security">Security</h2>
+<ul>
+  <li><strong>Escaping.</strong> Every text value goes through <code>esc()</code>, and every picture address through <code>safeUrl()</code> and then <code>esc()</code>. Ids are built only from values that match <code>[A-Za-z0-9_-]</code>. The output is safe to insert into a page.</li>
+  <li><strong>No HTML in the data.</strong> The format has no rich text, so there is no HTML to sanitize.</li>
+  <li><strong>Content Security Policy.</strong> The HTML has no inline script, event handlers or <code>style</code> attributes. The reader builds elements with DOM methods (never <code>innerHTML</code>), and its only style change is one CSS custom property set through the CSSOM. A policy as strict as <code>default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:</code> works. Add your image host to <code>img-src</code>.</li>
+  <li><strong>Links stay on the page.</strong> Every link in the HTML is a <code>#</code> address inside the manual.</li>
+</ul>
+<p>To report a vulnerability, see <a href="https://github.com/chooyee/bindpress-manual/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+<h2 id="types">TypeScript</h2>
+<p>Types are included, generated from the JSDoc in the source. The data shapes are exported as types too:</p>
+<pre><code>import { renderManual } from '@bindpress/manual';
+import type { Manual, Page, Block, RenderOptions, ValidationResult } from '@bindpress/manual';</code></pre>
+
+<h2 id="support">Browser support</h2>
+<p>The renderer runs anywhere modern JavaScript runs: Node 18 or later, Deno, Bun, workers and browsers. The stylesheet and the reader need a browser from 2023 or later (Chrome 105, Safari 16, Firefox 110) for container queries and <code>color-mix()</code>. In older browsers the manual still reads, with the wide layout.</p>
+</article>
+</div>
+
+<footer class="site-foot"><div>@bindpress/manual is released under the MIT License.</div></footer>
+</body>
+</html>

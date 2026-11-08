@@ -1,0 +1,98 @@
+{
+  "kind": "faq",
+  "title": "Help centre",
+  "subtitle": "Answers to the questions members ask most",
+  "version": "",
+  "updated": "2026-11-01",
+  "theme": "modern",
+  "numbering": "off",
+  "pages": [
+    {
+      "id": "account",
+      "title": "Your account",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "question",
+          "id": "open-account",
+          "question": "How do I open an account?",
+          "text": "Choose Register at the top of any page, fill in your details and confirm your email address. We verify new accounts within one working day."
+        },
+        {
+          "type": "question",
+          "id": "forgot-password",
+          "question": "I forgot my password. What now?",
+          "text": "Choose Forgot password on the sign-in page. We email you a link that works for one hour."
+        },
+        {
+          "type": "question",
+          "id": "change-email",
+          "question": "How do I change my email address?",
+          "text": "Go to Profile › Contact and choose Change. We send a code to the new address to confirm it."
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Keeping your account safe",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "We will never ask for your password by email or phone."
+        },
+        {
+          "type": "question",
+          "id": "two-step",
+          "question": "Can I turn on two-step sign-in?",
+          "text": "Yes. Go to Profile › Security and choose Turn on two-step sign-in. You will need a phone with an authenticator app."
+        }
+      ]
+    },
+    {
+      "id": "bidding",
+      "title": "Bidding",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Bids are binding: the highest bid when the auction closes wins the lot."
+        },
+        {
+          "type": "question",
+          "question": "Can I withdraw a bid?",
+          "text": "No. A bid is a promise to buy. Contact us at once if you made a mistake."
+        },
+        {
+          "type": "question",
+          "question": "What is a deposit, and when do I get it back?",
+          "text": "A deposit shows you are serious about a lot. We hold it until the auction closes.\nIf you do not win, we return it within three working days."
+        }
+      ]
+    },
+    {
+      "id": "payments",
+      "title": "Payments",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "question",
+          "id": "cards",
+          "question": "Which payment methods do you accept?",
+          "text": "Bank transfer, Visa and Mastercard."
+        },
+        {
+          "type": "question",
+          "id": "fees",
+          "question": "Are there any fees?",
+          "text": "The fees for each lot are listed with it."
+        },
+        {
+          "type": "table",
+          "text": "Method | Fee | Arrives in\nBank transfer | None | 1 working day\nCard | 1.5% | At once"
+        }
+      ]
+    }
+  ]
+}

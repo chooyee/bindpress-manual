@@ -1,0 +1,3 @@
+/* The page around the example manuals. The manual's own look comes from src/manual.css. */
+body { margin: 0; background: #f4f5f7; font-family: system-ui, sans-serif; }
+main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON format · @bindpress/manual</title>
+<meta name="description" content="The JSON format @bindpress/manual reads: the manual object, pages and levels, and the seven content block types.">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<header class="site-head"><div class="site-head-inner">
+  <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6M9 12h6"/></svg>@bindpress/manual</a>
+  <nav class="site-nav" aria-label="Documentation"><a href="index.html">Overview</a><a href="format.html" aria-current="page">JSON format</a><a href="api.html">API</a><a href="demo.html">Demo</a></nav>
+  <span class="spacer"></span><a class="gh" href="https://github.com/chooyee/bindpress-manual">GitHub</a>
+</div></header>
+
+<div class="page">
+<nav class="toc" aria-label="On this page"><strong>On this page</strong><ol>
+  <li><a href="#glance">At a glance</a></li>
+  <li><a href="#manual">The manual object</a></li>
+  <li><a href="#pages">Pages and levels</a></li>
+  <li><a href="#blocks">Content blocks</a><ol>
+    <li><a href="#paragraph">paragraph</a></li>
+    <li><a href="#heading">heading</a></li>
+    <li><a href="#list">list</a></li>
+    <li><a href="#note">note</a></li>
+    <li><a href="#table">table</a></li>
+    <li><a href="#picture">picture</a></li>
+    <li><a href="#question">question</a></li>
+  </ol></li>
+  <li><a href="#kinds">Manual or FAQ?</a></li>
+  <li><a href="#addresses">Addresses</a></li>
+  <li><a href="#rules">Checking and cleaning</a></li>
+  <li><a href="#schema">JSON Schema</a></li>
+  <li><a href="#examples">Full examples</a></li>
+</ol></nav>
+
+<article>
+<h1>The JSON format</h1>
+<p class="lead">A manual or FAQ is one JSON object: a few settings and a flat list of pages. Each page holds a list of content blocks. All text is plain text, never HTML.</p>
+
+<h2 id="glance">At a glance</h2>
+<pre><code>{
+  "kind": "manual",
+  "title": "Member guide",
+  "subtitle": "Signing in, bidding and paying",
+  "version": "Version 2.1",
+  "updated": "2026-11-05",
+  "theme": "classic",
+  "numbering": "on",
+  "pages": [
+    {
+      "id": "account",
+      "title": "Your account",
+      "level": 0,
+      "blocks": [
+        { "type": "paragraph", "text": "You need an account to bid." }
+      ]
+    },
+    {
+      "id": "sign-in",
+      "title": "Signing in",
+      "level": 1,
+      "blocks": [
+        { "type": "list", "style": "numbered", "text": "Choose Sign in.\nEnter your email address.\nChoose Continue." },
+        { "type": "note", "tone": "warning", "text": "After five wrong passwords your account is locked for 15 minutes." }
+      ]
+    }
+  ]
+}</code></pre>
+<p>Only <code>title</code> and <code>pages</code> are required. Every other field has a default.</p>
+
+<h2 id="manual">The manual object</h2>
+<div class="table-wrap"><table>
+  <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>title</code> <span class="req">required</span></td><td>string</td><td></td><td>Shown on the cover (manual) or at the top (FAQ), and in the running header of every sheet.</td></tr>
+    <tr><td><code>pages</code> <span class="req">required</span></td><td>array of <a href="#pages">pages</a></td><td></td><td>Chapters, sections and topics in reading order. It may be empty.</td></tr>
+    <tr><td><code>kind</code></td><td><code>"manual"</code> | <code>"faq"</code></td><td><code>"manual"</code></td><td>Chooses the view. A manual gets the paged view and an FAQ the help-centre view. See <a href="#kinds">Manual or FAQ?</a></td></tr>
+    <tr><td><code>subtitle</code></td><td>string</td><td><code>""</code></td><td>A line under the title.</td></tr>
+    <tr><td><code>version</code></td><td>string</td><td><code>""</code></td><td>Free text, such as <code>"Version 2.1"</code>. Shown on the cover and in the footer.</td></tr>
+    <tr><td><code>updated</code></td><td>string</td><td><code>""</code></td><td>The day it was last updated, written <code>YYYY-MM-DD</code>. Shown as "Last updated 5 November 2026".</td></tr>
+    <tr><td><code>theme</code></td><td><code>"classic"</code> | <code>"modern"</code> | <code>"friendly"</code></td><td><code>"classic"</code></td><td>Classic uses serif type and navy. Modern uses sans-serif type and teal. Friendly is rounder and green, with a typeface that is easier to read.</td></tr>
+    <tr><td><code>numbering</code></td><td><code>"on"</code> | <code>"off"</code></td><td><code>"on"</code></td><td>Numbers chapters and sections (1, 1.2, 1.2.1) and figures per chapter (Figure 2.1). When off, figures are numbered through the whole manual.</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="pages">Pages and levels</h2>
+<p>A page is a chapter, a section or (in an FAQ) a topic.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code> <span class="req">required</span></td><td>string</td><td>1 to 40 letters, digits, <code>-</code> or <code>_</code>, unique in the manual. It becomes part of the page's address, so keep it stable once people may have linked to it.</td></tr>
+    <tr><td><code>title</code> <span class="req">required</span></td><td>string</td><td>The page's heading, and its entry in the contents.</td></tr>
+    <tr><td><code>level</code> <span class="req">required</span></td><td>integer, 0 to 5</td><td>How deep the page sits: 0 is a chapter (or topic), 1 is a section under the page above it, 2 a sub-section, and so on.</td></tr>
+    <tr><td><code>blocks</code> <span class="req">required</span></td><td>array of <a href="#blocks">blocks</a></td><td>The page's content, in order. It may be empty.</td></tr>
+  </tbody>
+</table></div>
+
+<h3>Why a flat list?</h3>
+<p>Pages are stored as one list in reading order, and <code>level</code> gives the nesting. A page's sub-pages are the pages after it with a higher level, up to the next page at its own level or above. A flat list is easy to write by hand, validate and diff, and to produce from any language.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>pages[ ]</th><th>level</th><th>Number</th><th>Read as</th></tr></thead>
+  <tbody>
+    <tr><td>0</td><td>0</td><td>1</td><td>Your account</td></tr>
+    <tr><td>1</td><td>1</td><td>1.1</td><td>&nbsp;&nbsp;&nbsp;Signing in</td></tr>
+    <tr><td>2</td><td>2</td><td>1.1.1</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Two-step sign-in</td></tr>
+    <tr><td>3</td><td>1</td><td>1.2</td><td>&nbsp;&nbsp;&nbsp;Your profile</td></tr>
+    <tr><td>4</td><td>0</td><td>2</td><td>Bidding</td></tr>
+  </tbody>
+</table></div>
+<p>There are two rules. The first page must be level 0, and a page can sit at most one level below the page before it, so you can't go straight from 0 to 2.</p>
+
+<h2 id="blocks">Content blocks</h2>
+<p>Every block has a <code>type</code> and, for most types, a <code>text</code>. Text is plain: it is escaped, so <code>&lt;b&gt;</code> shows as written, and line breaks are kept. Which other fields a block uses depends on its type. Fields that don't belong to the type are ignored.</p>
+
+<h3 id="paragraph"><code>paragraph</code></h3>
+<p>A paragraph of text. An empty paragraph draws nothing.</p>
+<pre><code>{ "type": "paragraph", "text": "Bids are binding.\nThe highest bid wins the lot." }</code></pre>
+
+<h3 id="heading"><code>heading</code></h3>
+<p>A sub-heading inside a page. It sits one level below the page's own heading.</p>
+<pre><code>{ "type": "heading", "text": "Before you bid" }</code></pre>
+
+<h3 id="list"><code>list</code></h3>
+<p>One item per line. Blank lines are skipped.</p>
+<div class="table-wrap"><table><tbody>
+  <tr><td><code>text</code></td><td>The items, one per line</td></tr>
+  <tr><td><code>style</code></td><td><code>"bullets"</code> (default) or <code>"numbered"</code>, for steps</td></tr>
+</tbody></table></div>
+<pre><code>{ "type": "list", "style": "numbered", "text": "Sign in.\nOpen your profile.\nCheck your details." }</code></pre>
+
+<h3 id="note"><code>note</code></h3>
+<p>A highlighted box, labelled "Note" or "Important".</p>
+<div class="table-wrap"><table><tbody>
+  <tr><td><code>text</code></td><td>The note</td></tr>
+  <tr><td><code>tone</code></td><td><code>"info"</code> (default), shown as "Note", or <code>"warning"</code>, shown as "Important"</td></tr>
+</tbody></table></div>
+<pre><code>{ "type": "note", "tone": "warning", "text": "We will never ask for your password by email." }</code></pre>
+
+<h3 id="table"><code>table</code></h3>
+<p>One row per line, with cells split by <code>|</code>. The first row is the header. Wide tables scroll sideways on narrow screens.</p>
+<pre><code>{ "type": "table", "text": "Method | Fee | Arrives in\nBank transfer | None | 1 working day\nCard | 1.5% | At once" }</code></pre>
+
+<h3 id="picture"><code>picture</code></h3>
+<p>A figure with a numbered caption ("Figure 1.2"). In the reader, a click opens it full size.</p>
+<div class="table-wrap"><table><tbody>
+  <tr><td><code>fileUrl</code></td><td>The image address: <code>https://…</code>, a relative path, or <code>data:image/png|jpeg|gif|webp|svg+xml</code>. Any other address (such as <code>javascript:</code>) is refused, and a "The picture is missing" placeholder shows instead.</td></tr>
+  <tr><td><code>alt</code></td><td>What the picture shows, for people who can't see it. Please always fill it in.</td></tr>
+  <tr><td><code>caption</code></td><td>Shown under the picture, after its figure number.</td></tr>
+  <tr><td><code>size</code></td><td><code>"full"</code> (default), <code>"medium"</code> (70%) or <code>"small"</code> (45%)</td></tr>
+  <tr><td><code>align</code></td><td><code>"center"</code> (default), <code>"left"</code> or <code>"right"</code>, for a medium or small picture</td></tr>
+  <tr><td><code>fileId</code></td><td>Your own reference to the file, such as a media-library id. The renderer ignores it, so a CMS can store it and fill in <code>fileUrl</code> when it delivers the page.</td></tr>
+</tbody></table></div>
+<pre><code>{ "type": "picture", "fileUrl": "https://example.com/sign-in.png", "alt": "The sign-in form", "caption": "Signing in", "size": "medium", "align": "center" }</code></pre>
+<div class="callout"><p>Pictures load with the page rather than lazily. A sheet stays hidden until the reader turns to it, and signed storage addresses (S3, Azure) often expire within minutes, so a picture fetched late would fail.</p></div>
+
+<h3 id="question"><code>question</code></h3>
+<p>A question whose answer opens and closes. It is the main block of an FAQ, but a manual can use it too.</p>
+<div class="table-wrap"><table><tbody>
+  <tr><td><code>question</code> <span class="req">required</span></td><td>The question</td></tr>
+  <tr><td><code>text</code></td><td>The answer. Line breaks are kept.</td></tr>
+  <tr><td><code>id</code></td><td>Optional. A stable address for the answer, unique within the page (1 to 40 letters, digits, <code>-</code> or <code>_</code>). Without it, questions are numbered by their place (<code>q1</code>, <code>q2</code>, …), so a link changes when questions are reordered. Give questions an id once people share links to them.</td></tr>
+</tbody></table></div>
+<pre><code>{ "type": "question", "id": "forgot-password", "question": "I forgot my password. What now?", "text": "Choose Forgot password on the sign-in page." }</code></pre>
+
+<h2 id="kinds">Manual or FAQ?</h2>
+<p>Both kinds use the same format. <code>kind</code> chooses how the document is drawn:</p>
+<div class="table-wrap"><table>
+  <thead><tr><th></th><th><code>"manual"</code>: paged view</th><th><code>"faq"</code>: help-centre view</th></tr></thead>
+  <tbody>
+    <tr><td>Best for</td><td>Documents read in order: user guides, handbooks, procedures</td><td>Looking up one answer: help centres, support pages</td></tr>
+    <tr><td>Level 0 pages</td><td>Chapters, each starting a sheet</td><td>Topics, on one scrolling page</td></tr>
+    <tr><td>Cover and page numbers</td><td>Yes</td><td>No</td></tr>
+    <tr><td>Search</td><td>Highlights matches, and steps through them page by page</td><td>Filters the questions as you type</td></tr>
+    <tr><td>Print</td><td>One sheet per paper</td><td>All questions opened</td></tr>
+    <tr><td>Usual settings</td><td><code>numbering: "on"</code>, <code>theme: "classic"</code></td><td><code>numbering: "off"</code>, <code>theme: "modern"</code></td></tr>
+  </tbody>
+</table></div>
+<p>You can override the choice when rendering: <code>renderManual(json, { view: 'paged' })</code> or <code>{ view: 'faq' }</code>.</p>
+
+<h2 id="addresses">Addresses</h2>
+<p>Every page and answer has an id in the HTML, so you can link to it. The ids start with the <code>id</code> you pass to <code>renderManual()</code> (<code>"manual"</code> by default), which keeps two manuals on one page apart.</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>What</th><th>Address</th><th>Example, with <code>{ id: 'help' }</code></th></tr></thead>
+  <tbody>
+    <tr><td>A page or topic</td><td><code>#&lt;id&gt;-&lt;page id&gt;</code></td><td><code>#help-account</code></td></tr>
+    <tr><td>The cover (paged view)</td><td><code>#&lt;id&gt;-cover</code></td><td><code>#help-cover</code></td></tr>
+    <tr><td>An answer (FAQ view)</td><td><code>#&lt;id&gt;-&lt;page id&gt;-&lt;question id&gt;</code></td><td><code>#help-account-forgot-password</code></td></tr>
+  </tbody>
+</table></div>
+<p>The reader opens the sheet or answer that an address points to, and updates the address as people move around.</p>
+
+<h2 id="rules">Checking and cleaning</h2>
+<p><code>renderManual()</code> never fails on bad data. It cleans the data first with <code>normalizeManual()</code>:</p>
+<ul>
+  <li>A missing or unknown setting gets its default.</li>
+  <li>A block of an unknown type becomes a paragraph.</li>
+  <li>A level that is out of order is pulled back into order.</li>
+  <li>A page id that is missing or repeated is replaced.</li>
+  <li>A field that doesn't belong to a block's type is dropped.</li>
+</ul>
+<p>Use <code>validateManual()</code> where the JSON comes in, so authors hear about mistakes:</p>
+<pre><code>import { validateManual } from '@bindpress/manual';
+
+validateManual({ title: 'Guide', pages: [{ id: 'a', title: 'A', level: 1, blocks: [{ type: 'video' }] }] });
+// {
+//   valid: false,
+//   errors: [
+//     { path: 'pages[0].level', message: 'the first page must be a chapter (level 0)' },
+//     { path: 'pages[0].blocks[0].type', message: 'must be one of "paragraph", "heading", "list", "note", "table", "picture", "question"' }
+//   ]
+// }</code></pre>
+<p>Fields the format doesn't know are allowed and ignored. Data written for a newer version still loads in an older one.</p>
+
+<h2 id="schema">JSON Schema</h2>
+<p>The format is also a <a href="../schema/manual.schema.json">JSON Schema</a> (draft 2020-12), shipped as <code>@bindpress/manual/schema.json</code>. Point your editor at it for autocomplete and checking while you write:</p>
+<pre><code>{
+  "$schema": "https://chooyee.github.io/bindpress-manual/schema/manual.schema.json",
+  "title": "Member guide",
+  "pages": []
+}</code></pre>
+<p>A schema can't express the rules that compare pages with each other: the level order, unique page ids, and unique question ids within a page. <code>validateManual()</code> checks those too.</p>
+
+<h2 id="examples">Full examples</h2>
+<ul>
+  <li><a href="../examples/manual.json">examples/manual.json</a>: a member guide with every block type, sections and a picture.</li>
+  <li><a href="../examples/faq.json">examples/faq.json</a>: a help centre with topics, a sub-topic, notes and a table.</li>
+</ul>
+<p>Open them in the <a href="demo.html">demo</a> to change them and see the result.</p>
+</article>
+</div>
+
+<footer class="site-foot"><div>@bindpress/manual is released under the MIT License.</div></footer>
+</body>
+</html>

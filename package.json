@@ -1,0 +1,71 @@
+{
+  "name": "@bindpress/manual",
+  "version": "0.1.0",
+  "description": "Render a user manual or FAQ, written as one JSON document, to safe HTML: a PDF-style paged reader for manuals and a searchable help centre for FAQs. No dependencies, no build step, works under a strict CSP.",
+  "keywords": [
+    "manual",
+    "user-guide",
+    "faq",
+    "help-centre",
+    "documentation",
+    "renderer",
+    "json",
+    "server-side-rendering",
+    "vanilla-js",
+    "no-dependencies"
+  ],
+  "license": "MIT",
+  "author": "Lee Choo Yee",
+  "homepage": "https://chooyee.github.io/bindpress-manual/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chooyee/bindpress-manual.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chooyee/bindpress-manual/issues"
+  },
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./reader": {
+      "types": "./types/reader.d.ts",
+      "default": "./src/reader.js"
+    },
+    "./manual.css": "./src/manual.css",
+    "./schema.json": "./schema/manual.schema.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "types",
+    "schema",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "test:browser": "node scripts/browser-check.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "types": "tsc -p tsconfig.json",
+    "docs": "node scripts/serve.mjs",
+    "example": "node examples/server-render.mjs",
+    "prepack": "npm run types",
+    "prepublishOnly": "npm test && npm run typecheck"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "typescript": "^5.9.3"
+  }
+}

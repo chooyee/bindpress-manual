@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rendering in the browser</title>
+<!--
+  No build step: the package is plain ES modules. In your own page, load it from a CDN:
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual/src/manual.css">
+    import { renderManual } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual/src/index.js';
+    import { startManualReaders } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual/src/reader.js';
+  Here it loads the copy in this repository. Serve the folder first (npm run docs): browsers do
+  not load modules from file:// addresses.
+-->
+<link rel="stylesheet" href="../src/manual.css">
+<link rel="stylesheet" href="page.css">
+</head>
+<body>
+<main id="manual"></main>
+<script type="module">
+  import { renderManual } from '../src/index.js';
+  import { startManualReaders } from '../src/reader.js';
+
+  const manual = await (await fetch('faq.json')).json();
+  const target = document.getElementById('manual');
+  // renderManual() escapes everything an author typed, so its HTML is safe to insert as it is.
+  target.innerHTML = renderManual(manual, { id: 'help' });
+  startManualReaders(target);
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+{
+  "kind": "manual",
+  "title": "Member guide",
+  "subtitle": "Signing in, bidding and paying",
+  "version": "Version 2.1",
+  "updated": "2026-11-05",
+  "theme": "classic",
+  "numbering": "on",
+  "pages": [
+    {
+      "id": "welcome",
+      "title": "Welcome",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "This guide is for members who buy at our auctions. It covers your account, how bidding works and how to pay."
+        },
+        {
+          "type": "note",
+          "tone": "info",
+          "text": "Press / to search the guide, and the arrow keys to turn pages."
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "title": "Your account",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "You need an account to bid. It takes about five minutes to open one."
+        }
+      ]
+    },
+    {
+      "id": "sign-in",
+      "title": "Signing in",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "list",
+          "style": "numbered",
+          "text": "Choose Sign in at the top of any page.\nEnter your email address and password.\nChoose Sign in."
+        },
+        {
+          "type": "picture",
+          "fileUrl": "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20640%20320%22%3E%3Crect%20width=%22640%22%20height=%22320%22%20fill=%22%23eef2f7%22/%3E%3Crect%20x=%22170%22%20y=%2240%22%20width=%22300%22%20height=%22240%22%20rx=%2212%22%20fill=%22%23fff%22%20stroke=%22%23c9d2de%22/%3E%3Ctext%20x=%22320%22%20y=%2288%22%20font-family=%22sans-serif%22%20font-size=%2222%22%20font-weight=%22600%22%20text-anchor=%22middle%22%20fill=%22%231f3a68%22%3ESign%20in%3C/text%3E%3Crect%20x=%22200%22%20y=%22112%22%20width=%22240%22%20height=%2234%22%20rx=%226%22%20fill=%22%23fff%22%20stroke=%22%23c9d2de%22/%3E%3Ctext%20x=%22212%22%20y=%22134%22%20font-family=%22sans-serif%22%20font-size=%2213%22%20fill=%22%238a94a3%22%3EEmail%20address%3C/text%3E%3Crect%20x=%22200%22%20y=%22160%22%20width=%22240%22%20height=%2234%22%20rx=%226%22%20fill=%22%23fff%22%20stroke=%22%23c9d2de%22/%3E%3Ctext%20x=%22212%22%20y=%22182%22%20font-family=%22sans-serif%22%20font-size=%2213%22%20fill=%22%238a94a3%22%3EPassword%3C/text%3E%3Crect%20x=%22200%22%20y=%22214%22%20width=%22240%22%20height=%2238%22%20rx=%226%22%20fill=%22%231f3a68%22/%3E%3Ctext%20x=%22320%22%20y=%22238%22%20font-family=%22sans-serif%22%20font-size=%2214%22%20font-weight=%22600%22%20text-anchor=%22middle%22%20fill=%22%23fff%22%3ESign%20in%3C/text%3E%3C/svg%3E",
+          "alt": "The sign-in form, with boxes for email address and password and a Sign in button",
+          "caption": "The sign-in form",
+          "size": "medium",
+          "align": "center"
+        },
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "After five wrong passwords your account is locked for 15 minutes."
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "title": "Your profile",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Keep your details up to date so we can reach you about the lots you win."
+        },
+        {
+          "type": "table",
+          "text": "Detail | Where to change it | Checked by us\nEmail address | Profile › Contact | Yes\nPhone number | Profile › Contact | No\nBank account | Profile › Payments | Yes"
+        }
+      ]
+    },
+    {
+      "id": "bidding",
+      "title": "Bidding",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Bids are binding. When the auction closes, the highest bid wins the lot."
+        },
+        {
+          "type": "heading",
+          "text": "Before you bid"
+        },
+        {
+          "type": "list",
+          "style": "bullets",
+          "text": "Read the lot description and the conditions of sale.\nCheck the deposit you need.\nMake sure your account is verified."
+        }
+      ]
+    },
+    {
+      "id": "deposits",
+      "title": "Deposits",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Each lot states its deposit. We hold it until the auction closes and return it within three working days if you do not win."
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "title": "Common questions",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "question",
+          "question": "Can I withdraw a bid?",
+          "text": "No. A bid is a promise to buy. Contact us at once if you made a mistake."
+        },
+        {
+          "type": "question",
+          "question": "How do I know I won?",
+          "text": "We email you within an hour of the auction closing.\nThe lot also shows under Profile › Won lots."
+        }
+      ]
+    }
+  ]
+}

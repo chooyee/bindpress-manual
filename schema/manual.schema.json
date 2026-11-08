@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chooyee.github.io/bindpress-manual/schema/manual.schema.json",
+  "title": "Manual or FAQ",
+  "description": "A user manual or FAQ written as one JSON document, for @bindpress/manual. Pages are a flat list in reading order; `level` says how deep each page sits. Fields not listed here are allowed and ignored. Rules JSON Schema cannot express (the first page is level 0, a page sits at most one level below the page before it, page ids are unique, question ids are unique within a page) are checked by validateManual().",
+  "type": "object",
+  "required": ["title", "pages"],
+  "properties": {
+    "kind": {
+      "description": "manual: numbered chapters, drawn as PDF-style sheets. faq: questions that open and close, drawn as a help centre.",
+      "enum": ["manual", "faq"],
+      "default": "manual"
+    },
+    "title": { "type": "string", "description": "Shown on the cover (manual) or at the top (FAQ)." },
+    "subtitle": { "type": "string", "default": "" },
+    "version": { "type": "string", "default": "", "description": "Free text, such as \"Version 2.1\". Shown in the footer and cover." },
+    "updated": {
+      "type": "string",
+      "description": "The day it was last updated, written YYYY-MM-DD, or \"\".",
+      "anyOf": [{ "const": "" }, { "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" }],
+      "default": ""
+    },
+    "theme": { "enum": ["classic", "modern", "friendly"], "default": "classic" },
+    "numbering": {
+      "description": "on: chapters and sections are numbered 1, 1.2, 1.2.1, and figures 1.1, 1.2.",
+      "enum": ["on", "off"],
+      "default": "on"
+    },
+    "pages": {
+      "type": "array",
+      "description": "Chapters, sections and topics in reading order.",
+      "items": { "$ref": "#/$defs/page" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+    "page": {
+      "type": "object",
+      "required": ["id", "title", "level", "blocks"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id", "description": "Unique in the manual. Part of the page's address: #<render id>-<page id>." },
+        "title": { "type": "string" },
+        "level": { "type": "integer", "minimum": 0, "maximum": 5, "description": "0 = chapter (or FAQ topic), 1 = section under the page above, and so on." },
+        "blocks": { "type": "array", "items": { "$ref": "#/$defs/block" } }
+      }
+    },
+    "block": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["paragraph", "heading", "list", "note", "table", "picture", "question"] },
+        "text": { "type": "string", "default": "", "description": "Plain text; line breaks are kept. A list has one item per line; a table one row per line, cells split by |, the first row the header; a question holds its answer here." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "list" } } },
+          "then": { "properties": { "style": { "enum": ["bullets", "numbered"], "default": "bullets" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "note" } } },
+          "then": { "properties": { "tone": { "enum": ["info", "warning"], "default": "info" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "question" } } },
+          "then": {
+            "required": ["question"],
+            "properties": {
+              "question": { "type": "string", "minLength": 1, "pattern": "\\S" },
+              "id": { "$ref": "#/$defs/id", "description": "Optional. A stable address for the answer, unique within the page. Without it, questions are numbered by their place (q1, q2, ...)." }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "picture" } } },
+          "then": {
+            "properties": {
+              "fileUrl": { "type": "string", "description": "The image address: http(s), relative, or data:image/(png|jpeg|gif|webp|svg+xml). Anything else is not shown." },
+              "fileId": { "type": "string", "description": "Your own reference to the file. Not used by the renderer." },
+              "alt": { "type": "string", "description": "What the picture shows, for people who cannot see it." },
+              "caption": { "type": "string" },
+              "size": { "enum": ["full", "medium", "small"], "default": "full" },
+              "align": { "enum": ["center", "left", "right"], "default": "center" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@bindpress/manual</title>
+<meta name="description" content="Render a user manual or FAQ, written as one JSON document, to safe HTML: a PDF-style reader for manuals and a searchable help centre for FAQs.">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<header class="site-head"><div class="site-head-inner">
+  <a class="brand" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 8h6M9 12h6"/></svg>@bindpress/manual</a>
+  <nav class="site-nav" aria-label="Documentation"><a href="index.html" aria-current="page">Overview</a><a href="format.html">JSON format</a><a href="api.html">API</a><a href="demo.html">Demo</a></nav>
+  <span class="spacer"></span><a class="gh" href="https://github.com/chooyee/bindpress-manual">GitHub</a>
+</div></header>
+
+<div class="page">
+<nav class="toc" aria-label="On this page"><strong>On this page</strong><ol>
+  <li><a href="#what">What it does</a></li>
+  <li><a href="#install">Install</a></li>
+  <li><a href="#server">Render on a server</a></li>
+  <li><a href="#browser">Render in the browser</a></li>
+  <li><a href="#cdn">From a CDN, no build</a></li>
+  <li><a href="#cms">Inside a CMS</a></li>
+  <li><a href="#next">Next steps</a></li>
+</ol></nav>
+
+<article>
+<h1>@bindpress/manual</h1>
+<p class="lead">Turn a user manual or FAQ, written as one JSON document, into safe, accessible HTML. Manuals read like a PDF. FAQs work like a help centre.</p>
+<div class="buttons"><a class="button" href="demo.html">Try the live demo</a><a class="button ghost" href="format.html">The JSON format</a></div>
+
+<h2 id="what">What it does</h2>
+<p>You give it one JSON object: a title, a few settings and a flat list of pages, each holding paragraphs, lists, notes, tables, pictures and questions. It gives you back HTML, drawn in one of two views:</p>
+<div class="cards">
+  <div class="card"><h3>Manual: the paged view</h3><p>A cover with contents, then one A4-shaped sheet per chapter or section. With the reader script you get a folding contents tree, search with highlighted matches, page numbers, zoom, full screen and print-to-PDF.</p></div>
+  <div class="card"><h3>FAQ: the help-centre view</h3><p>Topics on the left, questions that open and close, and a link to every answer. With the reader script, search filters the questions as you type, and you get Expand all and the current topic marked in the list.</p></div>
+</div>
+<div class="cards">
+  <div class="card"><h3>Safe by default</h3><p>Every value is escaped and every picture address is checked, so the HTML can go straight on a page. The reader never uses <code>innerHTML</code> and runs under a strict Content Security Policy.</p></div>
+  <div class="card"><h3>Works without script</h3><p>The HTML is complete on its own: a long document for a manual, plain anchors and <code>&lt;details&gt;</code> for an FAQ. The reader only adds to it.</p></div>
+  <div class="card"><h3>No dependencies, no build</h3><p>Plain ES modules and one stylesheet. Use them from Node, a bundler or a <code>&lt;script type="module"&gt;</code>. Types are included.</p></div>
+</div>
+
+<h2 id="install">Install</h2>
+<pre><code>npm install @bindpress/manual</code></pre>
+<p>The package has three parts:</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Import</th><th>What it is</th><th>Runs on</th></tr></thead>
+  <tbody>
+    <tr><td><code>@bindpress/manual</code></td><td><code>renderManual()</code>, <code>validateManual()</code>, <code>faqJsonLd()</code> and the data model</td><td>Server or browser</td></tr>
+    <tr><td><code>@bindpress/manual/reader</code></td><td><code>startManualReaders()</code>: the interactive reader</td><td>Browser</td></tr>
+    <tr><td><code>@bindpress/manual/manual.css</code></td><td>The styles for both views and the three themes</td><td>Browser</td></tr>
+  </tbody>
+</table></div>
+<p>A JSON Schema for the input is at <code>@bindpress/manual/schema.json</code>.</p>
+
+<h2 id="server">Render on a server</h2>
+<p>This is the usual setup: the server renders the HTML, and the page loads the stylesheet and the reader.</p>
+<span class="label">server.js (Express, but any server works)</span>
+<pre><code>import express from 'express';
+import { renderManual, validateManual } from '@bindpress/manual';
+
+const app = express();
+app.use('/manual', express.static('node_modules/@bindpress/manual/src'));
+
+app.get('/help', async (req, res) =&gt; {
+  const faq = await loadFaqFromSomewhere();     // your JSON, from a CMS, a file or a database
+
+  const { valid, errors } = validateManual(faq); // optional: catch typos in the data
+  if (!valid) req.log?.warn({ errors }, 'The FAQ has mistakes; showing it anyway');
+
+  res.send(`&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;link rel="stylesheet" href="/manual/manual.css"&gt;
+  &lt;script type="module" src="/js/start-reader.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main&gt;${renderManual(faq, { id: 'help' })}&lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;`);
+});</code></pre>
+<span class="label">public/js/start-reader.js</span>
+<pre><code>import { startManualReaders } from '/manual/reader.js';
+startManualReaders();</code></pre>
+<p><code>renderManual()</code> escapes everything, so putting its result in your template is safe. You don't need <code>validateManual()</code> for safety. It tells you about mistakes in the data, such as a misspelled block type, that would otherwise be quietly cleaned away.</p>
+
+<h2 id="browser">Render in the browser</h2>
+<p>With a bundler (Vite, esbuild, webpack and others), import the pieces and insert the HTML:</p>
+<pre><code>import { renderManual } from '@bindpress/manual';
+import { startManualReaders } from '@bindpress/manual/reader';
+import '@bindpress/manual/manual.css';
+
+const manual = await (await fetch('/api/manual')).json();
+const target = document.querySelector('#manual');
+target.innerHTML = renderManual(manual);   // safe: renderManual escapes every value
+startManualReaders(target);</code></pre>
+
+<h2 id="cdn">From a CDN, no build</h2>
+<pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/src/manual.css"&gt;
+&lt;div id="manual"&gt;&lt;/div&gt;
+&lt;script type="module"&gt;
+  import { renderManual } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/src/index.js';
+  import { startManualReaders } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/src/reader.js';
+
+  const manual = await (await fetch('faq.json')).json();
+  document.getElementById('manual').innerHTML = renderManual(manual);
+  startManualReaders();
+&lt;/script&gt;</code></pre>
+
+<h2 id="cms">Inside a CMS</h2>
+<p>Store the manual as one field (a JSON column or a block prop). Then reviewing, versioning, publishing and access rules all cover the whole document at once. A block for a page builder takes one line:</p>
+<pre><code>import { renderManual, sampleManual } from '@bindpress/manual';
+
+export const manualBlock = {
+  label: 'Manual or FAQ',
+  defaultProps: { manual: sampleManual() },
+  render: (props, ctx) =&gt; renderManual(props.manual, { id: props.id, edit: ctx.edit })
+};</code></pre>
+<p>With <code>edit: true</code> you get a short summary card for an editor's canvas instead of the whole manual. The data model also has the tree moves an outline editor needs: <code>movePage</code>, <code>addPage</code>, <code>removePage</code> and <code>allowedMoves</code>. See the <a href="api.html#model">API</a>.</p>
+
+<h2 id="next">Next steps</h2>
+<ul>
+  <li><a href="format.html">The JSON format</a>: every field and block type, with examples.</li>
+  <li><a href="api.html">API reference</a>: functions, the reader, CSS custom properties, security.</li>
+  <li><a href="demo.html">Live demo</a>: edit the JSON and watch it render.</li>
+</ul>
+</article>
+</div>
+
+<footer class="site-foot"><div>@bindpress/manual is released under the MIT License.</div></footer>
+</body>
+</html>
