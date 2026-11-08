@@ -97,6 +97,11 @@ article td code { white-space: nowrap; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .demo-output { background: #1f252e; } }
 details.demo-source summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 
+/* Shown by needs-server.js when a page is opened from disk. */
+.needs-server { max-width: 640px; padding: 20px 24px; border-left: 4px solid var(--warn); border-radius: 0 8px 8px 0; background: var(--warn-soft); color: var(--fg); line-height: 1.5; }
+.needs-server p { margin: 8px 0; }
+.needs-server code { display: inline-block; padding: 4px 8px; border-radius: 4px; background: var(--bg); font: 14px var(--mono); }
+
 .site-foot { border-top: 1px solid var(--line); color: var(--fg-soft); font-size: 14px; }
 .site-foot div { max-width: 1180px; margin: 0 auto; padding: 24px 16px; }
 

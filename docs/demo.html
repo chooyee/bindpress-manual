@@ -7,6 +7,7 @@
 <meta name="description" content="Live demo of @bindpress/manual: edit a manual or FAQ as JSON and watch it render.">
 <link rel="stylesheet" href="docs.css">
 <link rel="stylesheet" href="../src/manual.css">
+<script src="needs-server.js"></script>
 <script type="module" src="demo.js"></script>
 </head>
 <body>
@@ -28,7 +29,7 @@
 </div>
 
 <div class="demo-grid">
-  <div class="demo-output" id="output" aria-live="off"><p>Loading…</p></div>
+  <div class="demo-output" id="output" aria-live="off" data-needs-server><p>Loading…</p></div>
   <div class="demo-editor">
     <label class="label" for="json">The JSON (edit it)</label>
     <p class="demo-status" id="status" role="status"></p>

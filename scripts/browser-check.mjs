@@ -92,6 +92,16 @@ try {
   check('manual, narrow: contents start closed', await page.$eval('[data-manual]', el => el.classList.contains('is-nav-closed')));
   check('manual, narrow: no sideways scroll', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
 
+  /* ---------- Rendering in the browser (examples/browser.html) ---------- */
+  await page.goto(`${BASE}/examples/browser.html`);
+  await page.waitForSelector('#manual [data-faq].is-reader', { timeout: 5000 }).catch(() => {});
+  check('browser example: renders the FAQ and starts the reader', Boolean(await page.$('#manual [data-faq].is-reader')));
+  const fromDisk = await browser.newPage();
+  await fromDisk.goto(new URL('../examples/browser.html', import.meta.url).href);
+  await fromDisk.waitForSelector('.needs-server', { timeout: 5000 }).catch(() => {});
+  check('browser example, opened from disk: explains that it needs a server', /needs a web server/.test(await fromDisk.textContent('#manual') || ''));
+  await fromDisk.close();
+
   /* ---------- Docs demo ---------- */
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${BASE}/docs/demo.html`);

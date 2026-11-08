@@ -12,7 +12,16 @@ const controls = ['example', 'view', 'theme', 'numbering'].map(byId);
 const examples = {};
 
 async function loadExample(name) {
-  if (!examples[name]) examples[name] = await (await fetch(`../examples/${name}.json`)).json();
+  if (!examples[name]) {
+    try {
+      const response = await fetch(`../examples/${name}.json`);
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      examples[name] = await response.json();
+    } catch (error) {
+      showStatus([`examples/${name}.json could not be loaded: ${error.message}`]);
+      return;
+    }
+  }
   editor.value = JSON.stringify(examples[name], null, 2);
   render();
 }

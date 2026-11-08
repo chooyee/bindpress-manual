@@ -1,3 +1,9 @@
 /* The page around the example manuals. The manual's own look comes from src/manual.css. */
 body { margin: 0; background: #f4f5f7; font-family: system-ui, sans-serif; }
 main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+.example-status { color: #586273; }
+
+/* Shown by ../docs/needs-server.js when the page is opened from disk. */
+.needs-server { max-width: 640px; padding: 20px 24px; border-left: 4px solid #a14a00; border-radius: 0 8px 8px 0; background: #fdf3e7; color: #1b2430; line-height: 1.5; }
+.needs-server p { margin: 8px 0; }
+.needs-server code { display: inline-block; padding: 4px 8px; border-radius: 4px; background: #fff; font: 14px ui-monospace, Menlo, Consolas, monospace; }
