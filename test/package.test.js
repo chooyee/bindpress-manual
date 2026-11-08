@@ -29,6 +29,7 @@ test('the JSON Schema lists the same values as the code', async () => {
 test('every entry point in package.json exists', async () => {
   const pkg = await json('package.json');
   for (const [name, target] of Object.entries(pkg.exports)) {
+    if (name.includes('*')) continue; // dist/* is made by npm run build
     for (const path of typeof target === 'string' ? [target] : [target.default]) {
       await assert.doesNotReject(access(new URL(path, root)), `${name} → ${path}`);
     }

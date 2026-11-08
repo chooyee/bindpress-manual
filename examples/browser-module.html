@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rendering in the browser, with modules</title>
+<!--
+  No build step: the package is plain ES modules. In your own page, load it from a CDN:
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual/src/manual.css">
+    import { renderManual } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual/src/index.js';
+    import { startManualReaders } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual/src/reader.js';
+  Here it loads the copy in this repository, so serve the folder first (npm run docs): browsers
+  do not load modules from file:// addresses. ../docs/needs-server.js says so on the page.
+-->
+<link rel="stylesheet" href="../src/manual.css">
+<link rel="stylesheet" href="page.css">
+<script src="../docs/needs-server.js"></script>
+</head>
+<body>
+<main id="manual" data-needs-server><p class="example-status">Loading the FAQ…</p></main>
+<script type="module">
+  import { renderManual } from '../src/index.js';
+  import { startManualReaders } from '../src/reader.js';
+
+  const target = document.getElementById('manual');
+  try {
+    const response = await fetch('faq.json');
+    if (!response.ok) throw new Error(`faq.json: ${response.status} ${response.statusText}`);
+    const manual = await response.json();
+    // renderManual() escapes everything an author typed, so its HTML is safe to insert as it is.
+    target.innerHTML = renderManual(manual, { id: 'help' });
+    startManualReaders(target);
+  } catch (error) {
+    const message = document.createElement('p');
+    message.className = 'example-status';
+    message.textContent = `The FAQ could not be loaded. ${error.message}`;
+    target.replaceChildren(message);
+  }
+</script>
+</body>
+</html>

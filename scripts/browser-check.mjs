@@ -1,6 +1,7 @@
 /**
  * Smoke test of the reader in a real browser (Chromium, through Playwright): both views under a
- * strict Content Security Policy, the narrow layouts, and the docs demo.
+ * strict Content Security Policy, the narrow layouts, both ways of rendering in the browser
+ * (script tag and modules), and the docs demo.
  *
  *   npx playwright install chromium   # once
  *   npm run test:browser
@@ -11,7 +12,9 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { startServer } from './serve.mjs';
+import { build } from './build.mjs';
 
+await build(); // the script-tag example loads dist/
 execFileSync(process.execPath, [fileURLToPath(new URL('../examples/server-render.mjs', import.meta.url))], { stdio: 'ignore' });
 const server = await startServer(0);
 const BASE = server.url;
@@ -92,14 +95,19 @@ try {
   check('manual, narrow: contents start closed', await page.$eval('[data-manual]', el => el.classList.contains('is-nav-closed')));
   check('manual, narrow: no sideways scroll', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
 
-  /* ---------- Rendering in the browser (examples/browser.html) ---------- */
-  await page.goto(`${BASE}/examples/browser.html`);
-  await page.waitForSelector('#manual [data-faq].is-reader', { timeout: 5000 }).catch(() => {});
-  check('browser example: renders the FAQ and starts the reader', Boolean(await page.$('#manual [data-faq].is-reader')));
+  /* ---------- Rendering in the browser: script tag (browser.html) and modules (browser-module.html) ---------- */
+  /** @param {import('playwright').Page} target */
+  const startsReader = (target) => target.waitForSelector('#manual [data-faq].is-reader', { timeout: 5000 }).then(() => true, () => false);
   const fromDisk = await browser.newPage();
+  await page.goto(`${BASE}/examples/browser.html`);
+  check('script-tag example: renders the FAQ and starts the reader', await startsReader(page));
   await fromDisk.goto(new URL('../examples/browser.html', import.meta.url).href);
+  check('script-tag example, opened from disk: works too', await startsReader(fromDisk));
+  await page.goto(`${BASE}/examples/browser-module.html`);
+  check('module example: renders the FAQ and starts the reader', await startsReader(page));
+  await fromDisk.goto(new URL('../examples/browser-module.html', import.meta.url).href);
   await fromDisk.waitForSelector('.needs-server', { timeout: 5000 }).catch(() => {});
-  check('browser example, opened from disk: explains that it needs a server', /needs a web server/.test(await fromDisk.textContent('#manual') || ''));
+  check('module example, opened from disk: explains that it needs a server', /needs a web server/.test(await fromDisk.textContent('#manual') || ''));
   await fromDisk.close();
 
   /* ---------- Docs demo ---------- */

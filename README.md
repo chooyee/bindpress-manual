@@ -38,6 +38,17 @@ In the page:
 
 With a bundler, import `@bindpress/manual/reader` and `@bindpress/manual/manual.css` instead.
 
+With a plain script tag, with no modules (this also works from a page opened from disk):
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/dist/manual.css">
+<script src="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/dist/bindpress-manual.min.js"></script>
+<script>
+  document.getElementById('manual').innerHTML = BindpressManual.renderManual(json);
+  BindpressManual.startManualReaders();
+</script>
+```
+
 ## The JSON
 
 ```json
@@ -69,6 +80,7 @@ Pages are a flat list in reading order. `level` gives the nesting (0 is a chapte
 | `@bindpress/manual/reader` | `startManualReaders`, `stopManualReaders` (browser) |
 | `@bindpress/manual/manual.css` | Styles for both views and the three themes (classic, modern, friendly) |
 | `@bindpress/manual/schema.json` | JSON Schema for the input |
+| `dist/bindpress-manual.min.js`, `dist/manual.css` | Everything in one classic script (`window.BindpressManual`), for a plain `<script src>` |
 
 TypeScript types are included.
 
@@ -78,6 +90,7 @@ TypeScript types are included.
 npm install
 npm test              # unit tests (node:test)
 npm run typecheck     # TypeScript reads the JSDoc
+npm run build         # dist/: the script-tag bundle
 npm run docs          # docs and examples at http://localhost:8000/docs/
 npx playwright install chromium && npm run test:browser   # the reader in a real browser
 ```

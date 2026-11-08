@@ -27,6 +27,8 @@
   "type": "module",
   "main": "./src/index.js",
   "types": "./types/index.d.ts",
+  "unpkg": "./dist/bindpress-manual.min.js",
+  "jsdelivr": "./dist/bindpress-manual.min.js",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
@@ -38,10 +40,12 @@
     },
     "./manual.css": "./src/manual.css",
     "./schema.json": "./schema/manual.schema.json",
+    "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
   "files": [
     "src",
+    "dist",
     "types",
     "schema",
     "README.md",
@@ -56,15 +60,17 @@
     "test:browser": "node scripts/browser-check.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "types": "tsc -p tsconfig.json",
+    "build": "node scripts/build.mjs",
     "docs": "node scripts/serve.mjs",
     "example": "node examples/server-render.mjs",
-    "prepack": "npm run types",
+    "prepack": "npm run types && npm run build",
     "prepublishOnly": "npm test && npm run typecheck"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "playwright": "^1.64.1",
     "typescript": "^5.9.3"
   }

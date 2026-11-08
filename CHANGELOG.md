@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- `dist/bindpress-manual.min.js` (and `.js`, `manual.css`): a classic-script bundle that sets `window.BindpressManual`, for pages that load the package with a plain `<script src>`. It works from a page opened from disk, where browsers refuse ES modules. Built by `npm run build`, and run before every publish.
+- `examples/browser.html` uses the bundle with the JSON in the page. The ES-module example is now `examples/browser-module.html`.
+
 ## [0.1.0] - 2026-11-08
 
 First release, taken out of the BindPress CMS's Manual block so other projects can use it.

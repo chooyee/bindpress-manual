@@ -3,39 +3,139 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rendering in the browser</title>
+<title>Rendering in the browser, with a script tag</title>
 <!--
-  No build step: the package is plain ES modules. In your own page, load it from a CDN:
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual/src/manual.css">
-    import { renderManual } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual/src/index.js';
-    import { startManualReaders } from 'https://cdn.jsdelivr.net/npm/@bindpress/manual/src/reader.js';
-  Here it loads the copy in this repository, so serve the folder first (npm run docs): browsers
-  do not load modules from file:// addresses. ../docs/needs-server.js says so on the page.
+  The classic-script build: one <script src>, no modules and no fetch(), so this page works even
+  opened straight from disk. It loads ../dist/, so build it once first: npm run build.
+  In your own page, load it from a CDN instead:
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/dist/manual.css">
+    <script src="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/dist/bindpress-manual.min.js"></script>
+  The ES-module way is in browser-module.html.
 -->
-<link rel="stylesheet" href="../src/manual.css">
+<link rel="stylesheet" href="../dist/manual.css">
 <link rel="stylesheet" href="page.css">
-<script src="../docs/needs-server.js"></script>
 </head>
 <body>
-<main id="manual" data-needs-server><p class="example-status">Loading the FAQ…</p></main>
-<script type="module">
-  import { renderManual } from '../src/index.js';
-  import { startManualReaders } from '../src/reader.js';
+<main id="manual"><p class="example-status">Loading the FAQ…</p></main>
 
-  const target = document.getElementById('manual');
-  try {
-    const response = await fetch('faq.json');
-    if (!response.ok) throw new Error(`faq.json: ${response.status} ${response.statusText}`);
-    const manual = await response.json();
+<!-- The manual itself, as JSON: a data block, which the browser never runs. A test keeps it the same as faq.json. -->
+<script type="application/json" id="faq-data">
+{
+  "kind": "faq",
+  "title": "Help centre",
+  "subtitle": "Answers to the questions members ask most",
+  "version": "",
+  "updated": "2026-11-01",
+  "theme": "modern",
+  "numbering": "off",
+  "pages": [
+    {
+      "id": "account",
+      "title": "Your account",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "question",
+          "id": "open-account",
+          "question": "How do I open an account?",
+          "text": "Choose Register at the top of any page, fill in your details and confirm your email address. We verify new accounts within one working day."
+        },
+        {
+          "type": "question",
+          "id": "forgot-password",
+          "question": "I forgot my password. What now?",
+          "text": "Choose Forgot password on the sign-in page. We email you a link that works for one hour."
+        },
+        {
+          "type": "question",
+          "id": "change-email",
+          "question": "How do I change my email address?",
+          "text": "Go to Profile › Contact and choose Change. We send a code to the new address to confirm it."
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Keeping your account safe",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "note",
+          "tone": "warning",
+          "text": "We will never ask for your password by email or phone."
+        },
+        {
+          "type": "question",
+          "id": "two-step",
+          "question": "Can I turn on two-step sign-in?",
+          "text": "Yes. Go to Profile › Security and choose Turn on two-step sign-in. You will need a phone with an authenticator app."
+        }
+      ]
+    },
+    {
+      "id": "bidding",
+      "title": "Bidding",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Bids are binding: the highest bid when the auction closes wins the lot."
+        },
+        {
+          "type": "question",
+          "question": "Can I withdraw a bid?",
+          "text": "No. A bid is a promise to buy. Contact us at once if you made a mistake."
+        },
+        {
+          "type": "question",
+          "question": "What is a deposit, and when do I get it back?",
+          "text": "A deposit shows you are serious about a lot. We hold it until the auction closes.\nIf you do not win, we return it within three working days."
+        }
+      ]
+    },
+    {
+      "id": "payments",
+      "title": "Payments",
+      "level": 0,
+      "blocks": [
+        {
+          "type": "question",
+          "id": "cards",
+          "question": "Which payment methods do you accept?",
+          "text": "Bank transfer, Visa and Mastercard."
+        },
+        {
+          "type": "question",
+          "id": "fees",
+          "question": "Are there any fees?",
+          "text": "The fees for each lot are listed with it."
+        },
+        {
+          "type": "table",
+          "text": "Method | Fee | Arrives in\nBank transfer | None | 1 working day\nCard | 1.5% | At once"
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<script src="../dist/bindpress-manual.min.js"></script>
+<script>
+  (function () {
+    var target = document.getElementById('manual');
+    if (!window.BindpressManual) {
+      var message = document.createElement('p');
+      message.className = 'example-status';
+      message.textContent = 'dist/bindpress-manual.min.js is missing. In the bindpress-manual folder, run: npm run build';
+      target.replaceChildren(message);
+      return;
+    }
+    var manual = JSON.parse(document.getElementById('faq-data').textContent);
     // renderManual() escapes everything an author typed, so its HTML is safe to insert as it is.
-    target.innerHTML = renderManual(manual, { id: 'help' });
-    startManualReaders(target);
-  } catch (error) {
-    const message = document.createElement('p');
-    message.className = 'example-status';
-    message.textContent = `The FAQ could not be loaded. ${error.message}`;
-    target.replaceChildren(message);
-  }
+    target.innerHTML = BindpressManual.renderManual(manual, { id: 'help' });
+    BindpressManual.startManualReaders(target);
+  })();
 </script>
 </body>
 </html>

@@ -24,6 +24,7 @@
   <li><a href="#reader">The reader</a></li>
   <li><a href="#styling">Styling</a></li>
   <li><a href="#security">Security</a></li>
+  <li><a href="#bundle">Script-tag bundle</a></li>
   <li><a href="#types">TypeScript</a></li>
   <li><a href="#support">Browser support</a></li>
 </ol></nav>
@@ -142,6 +143,9 @@ startManualReaders(container);   // only those inside an element, such as after 
   <li><strong>Links stay on the page.</strong> Every link in the HTML is a <code>#</code> address inside the manual.</li>
 </ul>
 <p>To report a vulnerability, see <a href="https://github.com/chooyee/bindpress-manual/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+<h2 id="bundle">The script-tag bundle</h2>
+<p><code>dist/bindpress-manual.min.js</code> (and the readable <code>dist/bindpress-manual.js</code>) is a classic script built from the same source. It sets one global, <code>window.BindpressManual</code>, holding everything that <code>@bindpress/manual</code> and <code>@bindpress/manual/reader</code> export. <code>dist/manual.css</code> is the stylesheet, minified. Use them where you can't use modules: a page opened from disk, an old build pipeline, or a CMS template that only allows a script tag. See <a href="index.html#script">With a script tag</a>.</p>
 
 <h2 id="types">TypeScript</h2>
 <p>Types are included, generated from the JSDoc in the source. The data shapes are exported as types too:</p>

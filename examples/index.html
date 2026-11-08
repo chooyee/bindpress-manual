@@ -11,7 +11,8 @@
 <h1>Examples</h1>
 <ul>
   <li><a href="output/faq.html">FAQ, rendered on the server</a> and <a href="output/manual.html">manual, rendered on the server</a>, with a strict Content Security Policy. They are made by <a href="server-render.mjs">server-render.mjs</a>: run <code>node examples/server-render.mjs</code> first.</li>
-  <li><a href="browser.html">Rendered in the browser</a>, with no build step.</li>
+  <li><a href="browser.html">Rendered in the browser with a script tag</a>: works even opened from disk (run <code>npm run build</code> once first).</li>
+  <li><a href="browser-module.html">Rendered in the browser with ES modules</a>: needs the folder served (<code>npm run docs</code>).</li>
   <li>The data: <a href="manual.json">manual.json</a> and <a href="faq.json">faq.json</a>.</li>
   <li><a href="../docs/demo.html">The live demo</a>, where you can edit the JSON.</li>
 </ul>

@@ -20,7 +20,8 @@
   <li><a href="#install">Install</a></li>
   <li><a href="#server">Render on a server</a></li>
   <li><a href="#browser">Render in the browser</a></li>
-  <li><a href="#cdn">From a CDN, no build</a></li>
+  <li><a href="#script">With a script tag</a></li>
+  <li><a href="#cdn">As ES modules from a CDN</a></li>
   <li><a href="#cms">Inside a CMS</a></li>
   <li><a href="#next">Next steps</a></li>
 </ol></nav>
@@ -51,6 +52,7 @@
     <tr><td><code>@bindpress/manual</code></td><td><code>renderManual()</code>, <code>validateManual()</code>, <code>faqJsonLd()</code> and the data model</td><td>Server or browser</td></tr>
     <tr><td><code>@bindpress/manual/reader</code></td><td><code>startManualReaders()</code>: the interactive reader</td><td>Browser</td></tr>
     <tr><td><code>@bindpress/manual/manual.css</code></td><td>The styles for both views and the three themes</td><td>Browser</td></tr>
+    <tr><td><code>dist/bindpress-manual.min.js</code></td><td>Everything above in one classic script, for a plain <code>&lt;script src&gt;</code>: sets <code>window.BindpressManual</code></td><td>Browser</td></tr>
   </tbody>
 </table></div>
 <p>A JSON Schema for the input is at <code>@bindpress/manual/schema.json</code>.</p>
@@ -99,7 +101,28 @@ const target = document.querySelector('#manual');
 target.innerHTML = renderManual(manual);   // safe: renderManual escapes every value
 startManualReaders(target);</code></pre>
 
-<h2 id="cdn">From a CDN, no build</h2>
+<h2 id="script">With a script tag</h2>
+<p>This is the simplest way to use it: one stylesheet, one script, and the manual's JSON in the page. It doesn't use modules or <code>fetch()</code>, so it works on any page, including one opened straight from disk.</p>
+<pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/dist/manual.css"&gt;
+
+&lt;div id="manual"&gt;&lt;/div&gt;
+
+&lt;script type="application/json" id="manual-data"&gt;
+{ "kind": "faq", "title": "Help centre", "pages": [ … ] }
+&lt;/script&gt;
+
+&lt;script src="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/dist/bindpress-manual.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  var manual = JSON.parse(document.getElementById('manual-data').textContent);
+  var target = document.getElementById('manual');
+  target.innerHTML = BindpressManual.renderManual(manual);   // safe: renderManual escapes every value
+  BindpressManual.startManualReaders(target);
+&lt;/script&gt;</code></pre>
+<p><code>window.BindpressManual</code> holds the whole API: <code>renderManual</code>, <code>validateManual</code>, <code>startManualReaders</code>, <code>stopManualReaders</code> and the rest. The JSON can also come from <code>fetch()</code> or your own code.</p>
+<div class="callout warn"><p>If the JSON in a <code>&lt;script type="application/json"&gt;</code> block is generated from data people typed, write every <code>&lt;</code> as <code>\u003c</code> (<code>JSON.stringify(data).replace(/&lt;/g, '\\u003c')</code>). A <code>&lt;/script&gt;</code> inside the text would otherwise end the block early.</p></div>
+
+<h2 id="cdn">As ES modules from a CDN</h2>
+<p>This is the same without a bundle. Modules are fetched like network requests, so the page must be served over <code>http(s)</code>: browsers don't load modules from a page opened from disk.</p>
 <pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@bindpress/manual@0.1/src/manual.css"&gt;
 &lt;div id="manual"&gt;&lt;/div&gt;
 &lt;script type="module"&gt;

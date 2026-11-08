@@ -18,6 +18,7 @@ cd bindpress-manual
 npm install
 npm test                                 # unit tests
 npm run typecheck                        # TypeScript reads the JSDoc
+npm run build                            # dist/: the script-tag bundle (esbuild)
 npm run docs                             # http://localhost:8000/docs/ and /examples/
 npx playwright install chromium          # once
 npm run test:browser                     # the reader in a real browser
@@ -36,6 +37,7 @@ npm run test:browser                     # the reader in a real browser
 | `src/reader.js` | The browser entry: starts and stops readers. |
 | `src/paged-reader.js`, `src/faq-reader.js`, `src/reader-search.js` | The readers. |
 | `src/manual.css` | Styles for everything. |
+| `scripts/build.mjs` | Builds `dist/`: the same source as one classic script. `src/` itself never needs a build. |
 
 ## Making a change
 

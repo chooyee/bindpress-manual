@@ -7,7 +7,7 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const rootWithSep = root.endsWith(sep) ? root : root + sep;
@@ -44,7 +44,8 @@ export function startServer(port) {
   });
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv[1])) {
+// Run as a script (not imported by browser-check.mjs). Drive letters may differ in case on Windows.
+if (process.argv[1] && pathToFileURL(process.argv[1]).href.toLowerCase() === import.meta.url.toLowerCase()) {
   const { url } = await startServer(Number(process.env.PORT) || 8000);
   console.log(`Docs:     ${url}/docs/\nExamples: ${url}/examples/`);
 }

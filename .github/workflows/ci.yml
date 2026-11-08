@@ -23,6 +23,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
+      - run: npm run build
       - name: Server render example
         run: node examples/server-render.mjs
       - name: Package contents
